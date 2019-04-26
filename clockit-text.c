@@ -117,28 +117,28 @@ uint8_t show_time_str = FALSE;
 uint8_t bright_level = BRIGHT;
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-prog_char num_string_0[] PROGMEM = "Zero";
-prog_char num_string_1[] PROGMEM = "One";
-prog_char num_string_2[] PROGMEM = "Two";
-prog_char num_string_3[] PROGMEM = "Three";
-prog_char num_string_4[] PROGMEM = "Four";
-prog_char num_string_5[] PROGMEM = "Five";
-prog_char num_string_6[] PROGMEM = "Six";
-prog_char num_string_7[] PROGMEM = "Seven";
-prog_char num_string_8[] PROGMEM = "Eight";
-prog_char num_string_9[] PROGMEM = "Nine";
-prog_char num_string_10[] PROGMEM = "Ten";
-prog_char num_string_11[] PROGMEM = "Eleven";
-prog_char num_string_12[] PROGMEM = "Twelve";
-prog_char num_string_13[] PROGMEM = "Thirteen";
-prog_char num_string_14[] PROGMEM = "Fourteen";
-prog_char num_string_15[] PROGMEM = "Fifteen";
-prog_char num_string_16[] PROGMEM = "Sixteen";
-prog_char num_string_17[] PROGMEM = "Seventeen";
-prog_char num_string_18[] PROGMEM = "Eighteen";
-prog_char num_string_19[] PROGMEM = "Nineteen";
+const char num_string_0[] PROGMEM = "Zero";
+const char num_string_1[] PROGMEM = "One";
+const char num_string_2[] PROGMEM = "Two";
+const char num_string_3[] PROGMEM = "Three";
+const char num_string_4[] PROGMEM = "Four";
+const char num_string_5[] PROGMEM = "Five";
+const char num_string_6[] PROGMEM = "Six";
+const char num_string_7[] PROGMEM = "Seven";
+const char num_string_8[] PROGMEM = "Eight";
+const char num_string_9[] PROGMEM = "Nine";
+const char num_string_10[] PROGMEM = "Ten";
+const char num_string_11[] PROGMEM = "Eleven";
+const char num_string_12[] PROGMEM = "Twelve";
+const char num_string_13[] PROGMEM = "Thirteen";
+const char num_string_14[] PROGMEM = "Fourteen";
+const char num_string_15[] PROGMEM = "Fifteen";
+const char num_string_16[] PROGMEM = "Sixteen";
+const char num_string_17[] PROGMEM = "Seventeen";
+const char num_string_18[] PROGMEM = "Eighteen";
+const char num_string_19[] PROGMEM = "Nineteen";
 
-PROGMEM const char *num_table[] = {
+const char *const num_table[] PROGMEM = {
   num_string_0,
   num_string_1,
   num_string_2,
@@ -161,14 +161,14 @@ PROGMEM const char *num_table[] = {
   num_string_19,
 };
 
-prog_char tens_string_0[]  PROGMEM = "Oh";
-prog_char tens_string_10[] PROGMEM = "Ten";
-prog_char tens_string_20[] PROGMEM = "Twenty";
-prog_char tens_string_30[] PROGMEM = "Thirty";
-prog_char tens_string_40[] PROGMEM = "Forty";
-prog_char tens_string_50[] PROGMEM = "Fifty";
+const char tens_string_0[]  PROGMEM = "Oh";
+const char tens_string_10[] PROGMEM = "Ten";
+const char tens_string_20[] PROGMEM = "Twenty";
+const char tens_string_30[] PROGMEM = "Thirty";
+const char tens_string_40[] PROGMEM = "Forty";
+const char tens_string_50[] PROGMEM = "Fifty";
 
-PROGMEM const char *tens_table[] = {
+const char *const tens_table[] PROGMEM = {
   tens_string_0,
   tens_string_10,
   tens_string_20,
@@ -177,7 +177,7 @@ PROGMEM const char *tens_table[] = {
   tens_string_50,
 };
 
-PROGMEM char CHARACTERS[] = {
+char const CHARACTERS[] PROGMEM = {
 //0bD0BGACFE
   0b00111111, // A
   0b10010111, // b
@@ -207,7 +207,7 @@ PROGMEM char CHARACTERS[] = {
   0b00110001, // z
 };
 
-PROGMEM char DIGITS[] = {
+const char DIGITS[] PROGMEM = {
 //0bD0BGACFE
   0b10101111, // 0
   0b00100100, // 1
@@ -221,13 +221,13 @@ PROGMEM char DIGITS[] = {
   0b10111110, // 9
 };
 
-PROGMEM char PUNCTUATION[] = {
+const char PUNCTUATION[] PROGMEM = {
 //0bD0BGACFE
   0b00010000, // -
   0b00100000, // '
 };
 
-ISR (SIG_OVERFLOW1)
+ISR (TIMER1_OVF_vect)
 {
   //Prescalar of 1024
   //Clock = 16MHz
@@ -275,7 +275,7 @@ ISR (SIG_OVERFLOW1)
   }
 }
 
-ISR (SIG_OVERFLOW2)
+ISR (TIMER2_OVF_vect)
 {
   if (program_state == SHOW_TIME && show_time_str == TRUE) {
     display_time_str(10);
@@ -1043,7 +1043,7 @@ void display_character(uint8_t character, uint8_t position)
   PORTC = 0; //Clear all segments
   PORTD &= ~((1<<2)|(1<<5)); //Clear D segment and decimal point
 
-  char* base_address;
+  const char* base_address;
   if (character >= 'A' && character <= 'Z') {
     base_address = CHARACTERS - 'A';
   } else if (character >= 'a' && character <= 'z') {
