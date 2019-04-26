@@ -3,24 +3,24 @@
   written by Nathan Seidle at Spark Fun Electronics
 
   A basic alarm clock that uses a 4 digit 7-segment display. Includes alarm and snooze.
-  Alarm will turn back on after 9 minutes if alarm is not disengaged. 
+  Alarm will turn back on after 9 minutes if alarm is not disengaged.
 
   To switch to text display, press and hold DOWN then press and hold SNOOZE for
   two seconds. Repeat to go back to regular display mode.
 
   The other modification is to dim the display at 7PM and brighten the display at 7AM.
-  
+
   Alarm is through a piezo buzzer.
   Three input buttons (up/down/snooze)
   1 slide switch (engage/disengage alarm)
-  
+
   Display is with PWM of segments - no current limiting resistors!
-  
+
   Uses external 16MHz clock as time base.
-  
+
   Set fuses:
   avrdude -p m168 -P lpt1 -c stk200 -U lfuse:w:0xE6:m
-  
+
   program hex:
   avrdude -p m168 -P lpt1 -c stk200 -U flash:w:clockit-text.hex
 
@@ -138,7 +138,7 @@ prog_char num_string_17[] PROGMEM = "Seventeen";
 prog_char num_string_18[] PROGMEM = "Eighteen";
 prog_char num_string_19[] PROGMEM = "Nineteen";
 
-PROGMEM const char *num_table[] = {   
+PROGMEM const char *num_table[] = {
   num_string_0,
   num_string_1,
   num_string_2,
@@ -168,7 +168,7 @@ prog_char tens_string_30[] PROGMEM = "Thirty";
 prog_char tens_string_40[] PROGMEM = "Forty";
 prog_char tens_string_50[] PROGMEM = "Fifty";
 
-PROGMEM const char *tens_table[] = {   
+PROGMEM const char *tens_table[] = {
   tens_string_0,
   tens_string_10,
   tens_string_20,
@@ -227,26 +227,26 @@ PROGMEM char PUNCTUATION[] = {
   0b00100000, // '
 };
 
-ISR (SIG_OVERFLOW1) 
+ISR (SIG_OVERFLOW1)
 {
   //Prescalar of 1024
   //Clock = 16MHz
   //15,625 clicks per second
-  //64us per click  
-    
+  //64us per click
+
   TCNT1 = 49911; //65536 - 15,625 = 49,911 - Preload timer 1 for 49,911 clicks. Should be 1s per ISR call
 
   //Debug with faster time!
   //TCNT1 = 63581; //65536 - 1,953 = 63581 - Preload timer 1 for 63581 clicks.
   // Should be 0.125s per ISR call - 8 times faster than normal time
-  
+
   flip_alarm = 1;
-  
+
   if(flip == 0)
     flip = 1;
   else
     flip = 0;
-    
+
   seconds++;
   if(seconds == 60)
   {
@@ -275,7 +275,7 @@ ISR (SIG_OVERFLOW1)
   }
 }
 
-ISR (SIG_OVERFLOW2) 
+ISR (SIG_OVERFLOW2)
 {
   if (program_state == SHOW_TIME && show_time_str == TRUE) {
     display_time_str(10);
@@ -370,7 +370,7 @@ int main (void)
   hours_alarm_snooze = 12;
   minutes_alarm_snooze = 00;
   seconds_alarm_snooze = 00;
-  ampm_alarm_snooze = AM;  
+  ampm_alarm_snooze = AM;
   alarm_going = FALSE;
   snooze = FALSE;
 
@@ -422,18 +422,18 @@ void check_buttons(void)
   uint8_t sling_shot = 0;
   uint8_t minute_change = 1;
   uint8_t previous_button = 0;
-  
+
   //If the user hits snooze while alarm is going off, record time so that we can set off alarm again in 9 minutes
   if ( (PIND & (1<<BUT_SNOOZE)) == 0 && alarm_going == TRUE)
   {
     alarm_going = FALSE; //Turn off alarm
     snooze = TRUE; //But remember that we are in snooze mode, alarm needs to go off again in a few minutes
-    
+
     seconds_alarm_snooze = 0;
     minutes_alarm_snooze = minutes + 9; //Snooze to 9 minutes from now
     hours_alarm_snooze = hours;
     ampm_alarm_snooze = ampm;
-    
+
     if(minutes_alarm_snooze > 59)
     {
       minutes_alarm_snooze -= 60;
@@ -441,7 +441,7 @@ void check_buttons(void)
 
       if(hours_alarm_snooze == 12)
       {
-        if(ampm_alarm_snooze == AM) 
+        if(ampm_alarm_snooze == AM)
           ampm_alarm_snooze = PM;
         else
           ampm_alarm_snooze = AM;
@@ -449,7 +449,7 @@ void check_buttons(void)
 
       if(hours_alarm_snooze == 13) hours_alarm_snooze = 1;
     }
-    
+
   }
 
   // toggle time display
@@ -490,27 +490,27 @@ void check_buttons(void)
             clear_display();
             delay_ms(250);
           }
-          
+
           while((PIND & (1<<BUT_SNOOZE)) == 0) ; //Wait for you to release button
           update_time_str();
           program_state = SHOW_TIME;
-          break; 
+          break;
         }
 
         if ( (PINB & (1<<BUT_UP)) == 0)
         {
           //Ramp minutes faster if we are holding the button
           //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-          if(previous_button == BUT_UP) 
+          if(previous_button == BUT_UP)
             sling_shot++;
           else
-          {  
+          {
             sling_shot = 0;
             minute_change = 1;
           }
-            
+
           previous_button = BUT_UP;
-          
+
           if (sling_shot > 5)
           {
             minute_change++;
@@ -518,7 +518,7 @@ void check_buttons(void)
             sling_shot = 0;
           }
           //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-          
+
           minutes += minute_change;
           if (minutes > 59)
           {
@@ -529,7 +529,7 @@ void check_buttons(void)
 
             if(hours == 12)
             {
-              if(ampm == AM) 
+              if(ampm == AM)
                 ampm = PM;
               else
                 ampm = AM;
@@ -541,16 +541,16 @@ void check_buttons(void)
         {
           //Ramp minutes faster if we are holding the button
           //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-          if(previous_button == BUT_DOWN) 
+          if(previous_button == BUT_DOWN)
             sling_shot++;
           else
           {
             sling_shot = 0;
             minute_change = 1;
           }
-            
+
           previous_button = BUT_DOWN;
-          
+
           if (sling_shot > 5)
           {
             minute_change++;
@@ -569,7 +569,7 @@ void check_buttons(void)
 
             if(hours == 11)
             {
-              if(ampm == AM) 
+              if(ampm == AM)
                 ampm = PM;
               else
                 ampm = AM;
@@ -581,7 +581,7 @@ void check_buttons(void)
         {
           previous_button = 0;
         }
-        
+
         //clear_display(); //Blink display
         //delay_ms(100);
       }
@@ -614,7 +614,7 @@ void check_buttons(void)
       while(1)
       {
         display_alarm_time(100); //Display current time for 100ms
-        
+
         if ( (PIND & (1<<BUT_SNOOZE)) == 0) //All done!
         {
           for(i = 0 ; i < 4 ; i++)
@@ -623,28 +623,28 @@ void check_buttons(void)
             clear_display();
             delay_ms(250);
           }
-          
+
           while((PIND & (1<<BUT_SNOOZE)) == 0) ; //Wait for you to release button
-          
+
           TIMSK2 = (1<<TOIE2); //Re-enable the timer 2 interrupt
-          
-          break; 
+
+          break;
         }
 
         if ( (PINB & (1<<BUT_UP)) == 0)
         {
           //Ramp minutes faster if we are holding the button
           //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-          if(previous_button == BUT_UP) 
+          if(previous_button == BUT_UP)
             sling_shot++;
           else
-          {  
+          {
             sling_shot = 0;
             minute_change = 1;
           }
-            
+
           previous_button = BUT_UP;
-          
+
           if (sling_shot > 5)
           {
             minute_change++;
@@ -662,7 +662,7 @@ void check_buttons(void)
 
             if(hours_alarm == 12)
             {
-              if(ampm_alarm == AM) 
+              if(ampm_alarm == AM)
                 ampm_alarm = PM;
               else
                 ampm_alarm = AM;
@@ -674,16 +674,16 @@ void check_buttons(void)
         {
           //Ramp minutes faster if we are holding the button
           //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-          if(previous_button == BUT_DOWN) 
+          if(previous_button == BUT_DOWN)
             sling_shot++;
           else
-          {  
+          {
             sling_shot = 0;
             minute_change = 1;
           }
-            
+
           previous_button = BUT_DOWN;
-          
+
           if (sling_shot > 5)
           {
             minute_change++;
@@ -701,7 +701,7 @@ void check_buttons(void)
 
             if(hours_alarm == 11)
             {
-              if(ampm_alarm == AM) 
+              if(ampm_alarm == AM)
                 ampm_alarm = PM;
               else
                 ampm_alarm = AM;
@@ -713,7 +713,7 @@ void check_buttons(void)
         {
           previous_button = 0;
         }
-        
+
         //clear_display(); //Blink display
         //delay_ms(100);
       }
@@ -735,7 +735,7 @@ void display_number(uint8_t number, uint8_t digit)
 {
   //Set the digit
   PORTD |= (1<<DIG_1)|(1<<DIG_2)|(1<<DIG_3)|(1<<DIG_4)|(1<<COL);
-  
+
   switch(digit)
   {
     case 1:
@@ -753,13 +753,13 @@ void display_number(uint8_t number, uint8_t digit)
     case 5:
       PORTD &= ~(1<<COL);//Select Digit COL
       break;
-    default: 
+    default:
       break;
   }
-  
+
   PORTC = 0; //Clear all segments
   PORTD &= ~((1<<2)|(1<<5)); //Clear D segment and decimal point
-  
+
   switch(number)
   {
     case 0:
@@ -819,10 +819,10 @@ void display_number(uint8_t number, uint8_t digit)
       PORTC |= 0b00000100; //Segments C
       break;
 
-    default: 
+    default:
       PORTC = 0;
       break;
-  } 
+  }
 }
 
 //Displays current time
@@ -853,28 +853,28 @@ void display_time(uint16_t time_on)
     delay_us(bright_level);
 #else
     //During debug, display mm:ss
-    display_number(minutes / 10, 1); 
+    display_number(minutes / 10, 1);
     delay_us(bright_level);
 
-    display_number(minutes % 10, 2); 
+    display_number(minutes % 10, 2);
     delay_us(bright_level);
 
-    display_number(seconds / 10, 3); 
+    display_number(seconds / 10, 3);
     delay_us(bright_level);
 
-    display_number(seconds % 10, 4); 
+    display_number(seconds % 10, 4);
     delay_us(bright_level);
 #endif
-    
+
     //Check whether it is AM or PM and turn on dot
     if(ampm == AM)
     {
       display_number(12, 5); //Turn on dot on digit 3
       delay_us(bright_level);
     }
-    
+
     //Flash colon for each second
-    if(flip == 0 && program_state == SHOW_TIME) 
+    if(flip == 0 && program_state == SHOW_TIME)
     {
       display_number(255, 5); //Post to digit COL
     }
@@ -883,7 +883,7 @@ void display_time(uint16_t time_on)
       display_number(10, 5); //Post to digit COL
     }
     delay_us(bright_level);
-    
+
     //Indicate wether the alarm is on or off
     if( (PINB & (1<<BUT_ALARM)) != 0)
     {
@@ -901,7 +901,7 @@ void display_time(uint16_t time_on)
     else
     {
       snooze = FALSE; //If the alarm switch is turned off, this resets the ~9 minute addtional snooze timer
-      
+
       hours_alarm_snooze = 88; //Set these values high, so that normal time cannot hit the snooze time accidentally
       minutes_alarm_snooze = 88;
       seconds_alarm_snooze = 88;
@@ -937,18 +937,18 @@ void display_alarm_time(uint16_t time_on)
     display_number(minutes_alarm % 10, 4); //Post to digit 4
     delay_us(bright_level);
 
-    
+
     //During debug, display mm:ss
-    /*display_number(minutes_alarm / 10, 1); 
+    /*display_number(minutes_alarm / 10, 1);
     delay_us(bright_level);
 
-    display_number(minutes_alarm % 10, 2); 
+    display_number(minutes_alarm % 10, 2);
     delay_us(bright_level);
 
-    display_number(seconds_alarm / 10, 3); 
+    display_number(seconds_alarm / 10, 3);
     delay_us(bright_level);
 
-    display_number(seconds_alarm % 10, 4); 
+    display_number(seconds_alarm % 10, 4);
     delay_us(bright_level);
 
     display_number(10, 5); //Display colon
@@ -960,7 +960,7 @@ void display_alarm_time(uint16_t time_on)
     {
       display_number(12, 5); //Turn on dot on digit 3
       delay_us(bright_level);
-    }    
+    }
 
     display_number(10, 5); //Post to digit COL
     delay_us(bright_level);
@@ -968,11 +968,11 @@ void display_alarm_time(uint16_t time_on)
     clear_display();
     delay_ms(1);
   }
-  
+
 }
 
 void display_time_str(uint16_t time_on)
-{  
+{
   for(uint16_t j = 0 ; j < time_on ; j++)
   {
     display_character(time_str[time_str_display_index], 1);
@@ -983,10 +983,10 @@ void display_time_str(uint16_t time_on)
 
     display_character(time_str[time_str_display_index + 2], 3);
     delay_us(bright_level);
-    
+
     display_character(time_str[time_str_display_index + 3], 4);
     delay_us(bright_level);
-    
+
     //Indicate wether the alarm is on or off
     if( (PINB & (1<<BUT_ALARM)) != 0)
     {
@@ -1018,7 +1018,7 @@ void display_character(uint8_t character, uint8_t position)
 {
   //Set the digit
   PORTD |= (1<<DIG_1)|(1<<DIG_2)|(1<<DIG_3)|(1<<DIG_4)|(1<<COL);
-  
+
   switch(position)
   {
     case 1:
@@ -1036,10 +1036,10 @@ void display_character(uint8_t character, uint8_t position)
     case 5:
       PORTD &= ~(1<<COL);//Select Digit COL
       break;
-    default: 
+    default:
       break;
   }
-  
+
   PORTC = 0; //Clear all segments
   PORTD &= ~((1<<2)|(1<<5)); //Clear D segment and decimal point
 
@@ -1063,7 +1063,7 @@ void display_character(uint8_t character, uint8_t position)
   PORTC |= character_bitmap;
   if (character_bitmap >> 7) {
     PORTD |= 0b00000100;
-  } 
+  }
 }
 
 //Make noise for time_on in (ms)
@@ -1085,7 +1085,7 @@ void siren(void)
   cbi(PORTB, BUZZ2);
 
   delay_ms(50);
-  
+
   for(int i = 0 ; i < 500 ; i++)
   {
     cbi(PORTB, BUZZ1);
@@ -1103,27 +1103,27 @@ void siren(void)
 
 void ioinit(void)
 {
-  //1 = output, 0 = input 
-  DDRB = 0b11111111 & ~((1<<BUT_UP)|(1<<BUT_DOWN)|(1<<BUT_ALARM)); //Up, Down, Alarm switch  
+  //1 = output, 0 = input
+  DDRB = 0b11111111 & ~((1<<BUT_UP)|(1<<BUT_DOWN)|(1<<BUT_ALARM)); //Up, Down, Alarm switch
   DDRC = 0b11111111;
   DDRD = 0b11111111 & ~(1<<BUT_SNOOZE); //Snooze button
-  
+
   PORTB = (1<<BUT_UP)|(1<<BUT_DOWN)|(1<<BUT_ALARM); //Enable pull-ups on these pins
   PORTD = (1<<BUT_SNOOZE); //Enable pull-up on snooze button
   PORTC = 0;
 
   //Init Timer0 for delay_us
-  TCCR0B = (1<<CS01); //Set Prescaler to clk/8 : 1click = 0.5us(assume we are running at external 16MHz). CS01=1 
-  
+  TCCR0B = (1<<CS01); //Set Prescaler to clk/8 : 1click = 0.5us(assume we are running at external 16MHz). CS01=1
+
   //Init Timer1 for second counting
   TCCR1B = (1<<CS12)|(1<<CS10); //Set prescaler to clk/1024 :1click = 64us (assume we are running at 16MHz)
   TIMSK1 = (1<<TOIE1); //Enable overflow interrupts
   TCNT1 = 49911; //65536 - 15,625 = 49,911 - Preload timer 1 for 49,911 clicks. Should be 1s per ISR call
-  
+
   //Init Timer2 for updating the display via interrupts
   TCCR2B = (1<<CS22)|(1<<CS21)|(1<<CS20); //Set prescalar to clk/1024 : 1 click = 64us (assume 16MHz)
   TIMSK2 = (1<<TOIE2); //TCNT2 should overflow every 16.384 ms (256 * 64us)
-  
+
 }
 
 //General short delays
@@ -1142,13 +1142,13 @@ void delay_ms(uint16_t x)
 void delay_us(uint16_t x)
 {
   x *= 2; //Correction for 16MHz
-  
+
   while(x > 256)
   {
     TIFR0 = (1<<TOV0); //Clear any interrupt flags on Timer2
     TCNT0 = 0; //256 - 125 = 131 : Preload timer 2 for x clicks. Should be 1us per click
     while( (TIFR0 & (1<<TOV0)) == 0);
-    
+
     x -= 256;
   }
 
