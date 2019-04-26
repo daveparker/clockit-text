@@ -177,6 +177,16 @@ const char *const tens_table[] PROGMEM = {
   tens_string_50,
 };
 
+// 7-Segment display IDs referenced below
+//
+//  - A -
+//  |   |
+//  F   B
+//  |-G-|
+//  E   C
+//  |   |
+//  - D - [0] <- decimal
+
 char const CHARACTERS[] PROGMEM = {
 //0bD0BGACFE
   0b00111111, // A
