@@ -3,7 +3,7 @@ ABOUT
 ClockIt TEXT. A modification by Dave Parker to ClockIt
 written by Nathan Seidle at Spark Fun Electronics
 
-Product URL: http://www.sparkfun.com/commerce/product_info.php?products_id=9205
+Product URL: https://www.sparkfun.com/products/retired/9205
 
 A basic alarm clock that uses a 4 digit 7-segment display. Includes alarm and snooze.
 Alarm will turn back on after 9 minutes if alarm is not disengaged. 
